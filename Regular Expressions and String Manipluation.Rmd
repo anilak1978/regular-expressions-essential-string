@@ -1,0 +1,232 @@
+---
+title: "Regular Expressions and String Functions"
+author: "Anil Akyildirim"
+date: "`r Sys.Date()`"
+output:
+  prettydoc::html_pretty:
+    theme: architect
+    highlight: github
+---
+
+## Question 1
+
+Copy the introductory example. The vector name stores the extracted names.
+
+R> name [1] "Moe Szyslak" "Burns, C. Montgomery" "Rev. Timothy Lovejoy" [4] "Ned Flanders" "Simpson, Homer" "Dr. Julius Hibbert"
+
+(a) Use the tools of this chapter to rearrange the vector so that all elements conform to the standard first_name last_name. 
+
+(b) Construct a logical vector indicating whether a character has a title (i.e., Rev. and Dr.). 
+
+(c) Construct a logical vector indicating whether a character has a second name. 
+
+## Answer 1
+
+```{r}
+# installing required package 
+install.packages('stringr', repos = "http://cran.us.r-project.org")
+library('stringr')
+```
+
+```{r}
+# creating the example raw data
+raw.data <- "555-1239Moe Szyslak(636) 555-0113Burns, C. Montgomery555 -6542Rev. Timothy Lovejoy555 8904Ned Flanders636-555-3226Simpson, Homer5553642Dr. Julius Hibbert"
+raw.data
+
+```
+
+```{r}
+#creating the example name list
+name <- unlist(str_extract_all(raw.data, "[[:alpha:]., ]{2,}"))
+name
+
+```
+
+**Answer (a)**
+
+When we look at the name list we can see that we need to pay attention.
+
+* Title of a person
+
+* Spaces
+
+* Order of the first name and the last name
+
+* Middle Initial of an individual.
+
+* Commas
+
+
+```{r}
+# removing the comma
+names_without_comma <- str_replace_all(name, pattern = ",", replacement = "")
+names_without_comma
+```
+
+
+```{r}
+# removing the title
+names_without_titles <- str_replace_all(names_without_comma, pattern = "[[:alpha:]]{2,}\\. ", replacement = "")
+names_without_titles
+```
+
+```{r}
+# removing the middle names
+names_without_middle_names <- str_replace_all(names_without_titles, pattern = "[[:alpha:]]{1,}\\. ", replacement = "" )
+names_without_middle_names
+
+
+```
+
+```{r}
+# displaying the first_name _last_name
+first_name_last_name <- str_replace(names_without_middle_names, pattern = "(\\w+)\\s+(\\w+)", replacement = "\\2 \\1")
+first_name_last_name
+
+```
+
+**Answer (b) Logical Vector indicating whether a character has a title**
+
+```{r}
+#using str_detect to give us True or False of title existence
+str_detect(names_without_comma, "[[:alpha:]]{2,}\\.")
+
+```
+
+**Answer (c) Logical Vector indicating whether a character has a middle name**
+
+```{r}
+# using str_detect to give us True of False of middle name existence 
+str_detect(names_without_titles, "[[:alpha:]]{1,}\\.")
+
+```
+
+
+## Question 2
+
+Describe the types of strings that conform to the following regular expressions and construct an example that is matched by the regular expression. 
+
+(a) [0-9]+\\$ 
+
+(b) \\b[a-z]{1,4}\\b 
+
+(c) .*?\\.txt$ 
+
+(d) \\d{2}/\\d{2}/\\d{4} 
+
+(e) <(.+?)>.+?</\\1>
+
+## Answer 2
+
+**Answer (a)**
+
+This string that has one or more numbers between 0 and 9 and will end with $
+so something like this  - 589$ -  
+
+
+```{r}
+web_text <- "In Europe they use $ sign at the end of the numbers, for example 435$"
+web_text
+
+```
+
+```{r}
+
+str_extract_all(web_text, "[0-9]+\\$")
+
+```
+
+**Answer(b)**
+
+The string that has any character counts from 1 to 4. (words that has 1 to 4 letters/characters)
+
+```{r}
+
+str_extract_all(web_text, "\\b[a-z]{1,4}\\b")
+
+```
+
+**Answer(c)**
+
+The string that ends with .txt
+
+```{r}
+
+file_formats <- "We have a lot of files named info.txt"
+file_formats
+```
+
+```{r}
+
+str_extract_all(file_formats, ".*?\\.txt$")
+
+```
+
+
+**Answer(d)**
+
+The string consists of 2 digit number followed by "/", 2 digit number follwed by "/" and 4 digit number. Looks like date/month/year or month/date/year.
+
+```{r}
+
+web_date <- "The last day for enrollment to the class was 08/27/2019"
+
+str_extract_all(web_date, "\\d{2}/\\d{2}/\\d{4}")
+
+
+```
+
+**Answer(e)**
+
+The string consists of <...> and anything in between and ends with </> . Looks like html.
+
+```{r}
+
+web_code <- "The way you construct the html body is that you start with <p>These pretzels are making me thirsty!</p>"
+str_extract_all(web_code, "<(.+?)>.+?</\\1>")
+
+```
+
+
+## Question 9
+
+The following code hides a secret message. Crack it with R and regular expressions. Hint: Some of the characters are more revealing than others! The code snippet is also available in the materials at www.r-datacollection.com.
+
+clcopCow1zmstc0d87wnkig7OvdicpNuggvhryn92Gjuwczi8hqrfpRxs5Aj5dwpn0Tanwo Uwisdij7Lj8kpf03AT5Idr3coc0bt7yczjatOaootj55t3Nj3ne6c4Sfek.r1w1YwwojigO d6vrfUrbz2.2bkAnbhzgv4R9i05zEcrop.wAgnb.SqoU65fPa1otfb7wEm24k6t3sR9zqe5 fy89n6Nd5t9kc4fE905gmc4Rgxo5nhDk!gr
+
+## Answer 9
+
+```{r}
+# creating the message object
+
+scripted_message <- "clcopCow1zmstc0d87wnkig7OvdicpNuggvhryn92Gjuwczi8hqrfpRxs5Aj5dwpn0Tanwo Uwisdij7Lj8kpf03AT5Idr3coc0bt7yczjatOaootj55t3Nj3ne6c4Sfek.r1w1YwwojigO d6vrfUrbz2.2bkAnbhzgv4R9i05zEcrop.wAgnb.SqoU65fPa1otfb7wEm24k6t3sR9zqe5 fy89n6Nd5t9kc4fE905gmc4Rgxo5nhDk!gr"
+
+scripted_message
+
+```
+
+
+```{r}
+#lets see if we can find anything in the numbers.
+
+str_extract_all(scripted_message, "[:digit:]")
+
+```
+
+```{r}
+
+#lets see if we can find anything in the capital numbers.
+str_extract_all(scripted_message, "[:upper:]")
+
+```
+
+Well it says Congratulations You are a super nerd but all characters are individually shown,
+
+```{r}
+# combining each separate character, adding period
+cat(unlist(str_extract_all(scripted_message, "[[:upper:].]")))
+
+```
+
+
+
